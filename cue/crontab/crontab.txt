@@ -1,5 +1,5 @@
 MAILTO=whitman
-XDG_CONFIG_DIR="/etc/"
-XDG_DATA_DIR="/var/lib/"
+XDG_CONFIG_HOME="/etc/"
+XDG_DATA_HOME="/var/lib/"
 
-0 7 * * * /usr/local/bin/cue | /usr/local/bin/cue_notify.sh
+0 11 * * * /usr/local/bin/cue | /usr/local/bin/cue_notify.sh
