@@ -11,8 +11,8 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 SOURCE_CODE="https://github.com/bbkingisking/lfc.git"
 BINARY_DEST="/usr/local/bin"
 
-XDG_CONFIG_DIR="/etc"
-XDG_DATA_DIR="/var/lib"
+XDG_CONFIG_HOME="/etc"
+XDG_DATA_HOME="/var/lib"
 CREDS="/etc/credstore"
 
 DB_PATH="/var/lib/lfc/articles.db"
@@ -61,19 +61,19 @@ sudo chmod +x "$BINARY_DEST/lfc.sh"
 
 # ─── 4. move config and secrets ───────────────────────────────────────────────
 
-sudo mkdir -p "$XDG_CONFIG_DIR/$APP_NAME"
+sudo mkdir -p "$XDG_CONFIG_HOME/$APP_NAME"
 for config_file in "$SCRIPT_DIR/config"/*; do
     [ -f "$config_file" ] || continue  # Skip if no files or directories
     filename=$(basename "$config_file")
-    sudo cp "$config_file" "$XDG_CONFIG_DIR/$APP_NAME"
-    sudo chown "$SERVICE_USER" "$XDG_CONFIG_DIR/$APP_NAME/$filename"
-    sudo chmod 600 "$XDG_CONFIG_DIR/$APP_NAME/$filename"
+    sudo cp "$config_file" "$XDG_CONFIG_HOME/$APP_NAME"
+    sudo chown "$SERVICE_USER" "$XDG_CONFIG_HOME/$APP_NAME/$filename"
+    sudo chmod 600 "$XDG_CONFIG_HOME/$APP_NAME/$filename"
 done
 
-sudo chown -R "$SERVICE_USER" "$XDG_CONFIG_DIR/$APP_NAME"
+sudo chown -R "$SERVICE_USER" "$XDG_CONFIG_HOME/$APP_NAME"
 
-sudo mkdir -p "$XDG_DATA_DIR/$APP_NAME"
-sudo chown -R "$SERVICE_USER" "$XDG_DATA_DIR/$APP_NAME"
+sudo mkdir -p "$XDG_DATA_HOME/$APP_NAME"
+sudo chown -R "$SERVICE_USER" "$XDG_DATA_HOME/$APP_NAME"
 
 sudo mkdir -p "$CREDS"
 for cred_file in "$SCRIPT_DIR/secrets"/*.cred; do
