@@ -11,7 +11,8 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 SOURCE_CODE="https://github.com/bbkingisking/cue.git"
 BINARY_DEST="/usr/local/bin"
 
-XDG_CONFIG_DIR="/etc/"
+XDG_CONFIG_HOME="/etc"
+XDG_DATA_HOME="/var/lib"
 CREDS="/etc/credstore/"
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
@@ -56,10 +57,15 @@ sudo chmod +x "$BINARY_DEST/cue_notify.sh"
 
 # ─── 4. move config and secrets ───────────────────────────────────────────────
 
-sudo mkdir -p "$XDG_CONFIG_DIR/$APP_NAME"
-sudo cp "$SCRIPT_DIR/config/config.toml" "$XDG_CONFIG_DIR/$APP_NAME"
-sudo chown "$SERVICE_USER" "$XDG_CONFIG_DIR/$APP_NAME/config.toml"
-sudo chmod 600 "$XDG_CONFIG_DIR/$APP_NAME/config.toml"
+sudo mkdir -p "$XDG_CONFIG_HOME/$APP_NAME"
+sudo cp "$SCRIPT_DIR/config/config.toml" "$XDG_CONFIG_HOME/$APP_NAME"
+sudo chown "$SERVICE_USER" "$XDG_CONFIG_HOME/$APP_NAME/config.toml"
+sudo chmod 600 "$XDG_CONFIG_HOME/$APP_NAME/config.toml"
+
+sudo mkdir -p "$XDG_DATA_HOME/$APP_NAME"
+sudo touch "$XDG_DATA_HOME/$APP_NAME/state.json"
+sudo chown -R "$SERVICE_USER" "$XDG_DATA_HOME/$APP_NAME"
+sudo chmod 600 "$XDG_DATA_HOME/$APP_NAME/state.json"
 
 sudo mkdir -p "$CREDS"
 sudo cp "$SCRIPT_DIR/secrets/cue-chat-id.cred" "$CREDS"
