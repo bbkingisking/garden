@@ -63,9 +63,7 @@ sudo chown "$SERVICE_USER" "$XDG_CONFIG_HOME/$APP_NAME/config.toml"
 sudo chmod 600 "$XDG_CONFIG_HOME/$APP_NAME/config.toml"
 
 sudo mkdir -p "$XDG_DATA_HOME/$APP_NAME"
-sudo touch "$XDG_DATA_HOME/$APP_NAME/state.json"
 sudo chown -R "$SERVICE_USER" "$XDG_DATA_HOME/$APP_NAME"
-sudo chmod 600 "$XDG_DATA_HOME/$APP_NAME/state.json"
 
 sudo mkdir -p "$CREDS"
 sudo cp "$SCRIPT_DIR/secrets/cue-chat-id.cred" "$CREDS"
