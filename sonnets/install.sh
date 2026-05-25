@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 
 # ─── config ───────────────────────────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ die()   { echo "    [error] $*" >&2; exit 1; }
 # ─── 1. dependency check ──────────────────────────────────────────────────────
 
 info "Checking dependencies..."
-deps=(git cargo systemd-creds sqlite3)
+deps=(git cargo systemd-creds sqlite3 restic rclone jq)
 for cmd in "${deps[@]}"; do
   command -v "$cmd" &>/dev/null || die "$cmd not found"
 done
@@ -42,7 +42,7 @@ else
   sudo useradd -M -s /usr/sbin/nologin -G "$CREDS_GROUP" "$SERVICE_USER"
 fi
 
-# ─── 3. compile binary ────────────────────────────────────────────────────────
+# ─── 3. compile ───────────────────────────────────────────────────────────────
 
 info "Cloning source code..."
 TEMP_DIR="$(mktemp -d)"
@@ -56,12 +56,10 @@ sudo rm -rf "$TEMP_DIR"
 
 sudo chmod +x "$BINARY_DEST/$APP_NAME"
 
-# ─── 4. move wrapper script ───────────────────────────────────────────────────
-
 sudo cp "$SCRIPT_DIR/bin/sonnets.sh" "$BINARY_DEST"
 sudo chmod +x "$BINARY_DEST/sonnets.sh"
 
-# ─── 5. move config and secrets ───────────────────────────────────────────────
+# ─── 4. move config and secrets ───────────────────────────────────────────────
 
 sudo mkdir -p "$XDG_CONFIG_HOME/$APP_NAME"
 for config_file in "$SCRIPT_DIR/config"/*; do

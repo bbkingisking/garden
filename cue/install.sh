@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 
 # ─── config ───────────────────────────────────────────────────────────────────
 
@@ -13,7 +13,7 @@ BINARY_DEST="/usr/local/bin"
 
 XDG_CONFIG_HOME="/etc"
 XDG_DATA_HOME="/var/lib"
-CREDS="/etc/credstore/"
+CREDS="/etc/credstore"
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -58,21 +58,25 @@ sudo chmod +x "$BINARY_DEST/cue_notify.sh"
 # ─── 4. move config and secrets ───────────────────────────────────────────────
 
 sudo mkdir -p "$XDG_CONFIG_HOME/$APP_NAME"
-sudo cp "$SCRIPT_DIR/config/config.toml" "$XDG_CONFIG_HOME/$APP_NAME"
-sudo chown "$SERVICE_USER" "$XDG_CONFIG_HOME/$APP_NAME/config.toml"
-sudo chmod 600 "$XDG_CONFIG_HOME/$APP_NAME/config.toml"
+for config_file in "$SCRIPT_DIR/config"/*; do
+    [ -f "$config_file" ] || continue
+    filename=$(basename "$config_file")
+    sudo cp "$config_file" "$XDG_CONFIG_HOME/$APP_NAME"
+    sudo chown "$SERVICE_USER" "$XDG_CONFIG_HOME/$APP_NAME/$filename"
+    sudo chmod 600 "$XDG_CONFIG_HOME/$APP_NAME/$filename"
+done
 
 sudo mkdir -p "$XDG_DATA_HOME/$APP_NAME"
 sudo chown -R "$SERVICE_USER" "$XDG_DATA_HOME/$APP_NAME"
 
 sudo mkdir -p "$CREDS"
-sudo cp "$SCRIPT_DIR/secrets/cue-chat-id.cred" "$CREDS"
-sudo chown "$SERVICE_USER" "$CREDS/cue-chat-id.cred"
-sudo chmod 600 "$CREDS/cue-chat-id.cred"
-
-sudo cp "$SCRIPT_DIR/secrets/cue-notify.cred" "$CREDS"
-sudo chown "$SERVICE_USER" "$CREDS/cue-notify.cred"
-sudo chmod 600 "$CREDS/cue-notify.cred"
+for cred_file in "$SCRIPT_DIR/secrets"/*.cred; do
+    [ -f "$cred_file" ] || continue
+    filename=$(basename "$cred_file")
+    sudo cp "$cred_file" "$CREDS"
+    sudo chown "$SERVICE_USER" "$CREDS/$filename"
+    sudo chmod 600 "$CREDS/$filename"
+done
 
 # ─── 5. set up cron ───────────────────────────────────────────────────────────
 

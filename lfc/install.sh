@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 
 # ─── config ───────────────────────────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ die()   { echo "    [error] $*" >&2; exit 1; }
 # ─── 1. dependency check ──────────────────────────────────────────────────────
 
 info "Checking dependencies..."
-deps=(git cargo systemd-creds)
+deps=(git cargo systemd-creds sqlite3 restic rclone jq)
 for cmd in "${deps[@]}"; do
   command -v "$cmd" &>/dev/null || die "$cmd not found"
 done
@@ -94,19 +94,9 @@ sudo crontab -u "$SERVICE_USER" "$SCRIPT_DIR/crontab/crontab.txt"
 
 # ─── 6. set up db ─────────────────────────────────────────────────────────────
 
-#!/bin/bash
-set -euo pipefail
-
-# ── Check if database already exists ───────────────────────────
 if [[ -f "$DB_PATH" ]]; then
     sudo chmod 644 "$DB_PATH"
     exit 0
-fi
-
-# ── Pre‑checks ─────────────────────────────────────────────────
-if ! command -v sqlite3 &>/dev/null; then
-    die "ERROR: sqlite3 is required but not installed." >&2
-    exit 1
 fi
 
 # ── Temporary workspace ────────────────────────────────────────
