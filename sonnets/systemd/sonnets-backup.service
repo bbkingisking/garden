@@ -1,0 +1,24 @@
+[Unit]
+Description=Daily backup of sonnets database
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=sonnets
+
+LoadCredentialEncrypted=sonnets-db-url:/etc/credstore/sonnets/sonnets-db-url.cred
+LoadCredentialEncrypted=sonnets-db-backup:/etc/credstore/sonnets/sonnets-db-backup.cred
+
+Environment=RESTIC_REPOSITORY_FILE=%d/sonnets-db-url
+Environment=RESTIC_PASSWORD_FILE=%d/sonnets-db-backup
+
+Environment=XDG_CACHE_HOME=/var/cache/sonnets
+
+ExecStart=/usr/local/sbin/sonnets-backup
+
+PrivateTmp=yes
+ProtectSystem=strict
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6

@@ -1,0 +1,17 @@
+[Unit]
+Description=Daily sonnets from Claudio di Montefiore
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=sonnets
+
+Environment=XDG_CONFIG_HOME=/etc/
+Environment=XDG_DATA_HOME=/var/lib/
+
+LoadCredentialEncrypted=sonnets-anthropic-key:/etc/credstore/sonnets/sonnets-anthropic-key.cred
+LoadCredentialEncrypted=sonnets-telegram-bot-token:/etc/credstore/sonnets/sonnets-telegram-bot-token.cred
+LoadCredentialEncrypted=sonnets-telegram-chat-ids:/etc/credstore/sonnets/sonnets-telegram-chat-ids.cred
+
+ExecStart=/usr/local/bin/sonnets
