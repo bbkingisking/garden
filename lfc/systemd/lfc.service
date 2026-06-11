@@ -1,0 +1,20 @@
+[Unit]
+Description=LFC article notifier
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=lfc
+
+Environment=XDG_CONFIG_HOME=/etc/
+Environment=XDG_DATA_HOME=/var/lib/
+
+LoadCredentialEncrypted=lfc-api-key:/etc/credstore/lfc/lfc-api-key.cred
+LoadCredentialEncrypted=lfc-emails:/etc/credstore/lfc/lfc-emails.cred
+LoadCredentialEncrypted=lfc-telegram-chat-ids:/etc/credstore/lfc/lfc-telegram-chat-ids.cred
+LoadCredentialEncrypted=lfc-telegram-bot-token:/etc/credstore/lfc/lfc-telegram-bot-token.cred
+LoadCredentialEncrypted=lfc-email-username:/etc/credstore/lfc/lfc-email-username.cred
+LoadCredentialEncrypted=lfc-email-app-password:/etc/credstore/lfc/lfc-email-app-password.cred
+
+ExecStart=/usr/local/bin/lfc

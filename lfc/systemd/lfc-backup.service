@@ -1,0 +1,24 @@
+[Unit]
+Description=Daily backup of lfc database
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=lfc
+
+LoadCredentialEncrypted=lfc-db-url:/etc/credstore/lfc/lfc-db-url.cred
+LoadCredentialEncrypted=lfc-db-backup:/etc/credstore/lfc/lfc-db-backup.cred
+
+Environment=RESTIC_REPOSITORY_FILE=%d/lfc-db-url
+Environment=RESTIC_PASSWORD_FILE=%d/lfc-db-backup
+
+Environment=XDG_CACHE_HOME=/var/cache/lfc
+
+ExecStart=/usr/local/sbin/lfc-backup
+
+PrivateTmp=yes
+ProtectSystem=strict
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6
