@@ -1,0 +1,17 @@
+[Unit]
+Description=Hwaiting Backend Service
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+User=ajussi
+Group=nogroup
+EnvironmentFile=/etc/hwaiting/config
+LoadCredentialEncrypted=hwaiting-jwt:/etc/credstore/hwaiting/hwaiting-jwt.cred
+LoadCredentialEncrypted=hwaiting-admin-pw:/etc/credstore/hwaiting/hwaiting-admin-pw.cred
+ExecStart=/usr/local/bin/hwaiting
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,23 @@
+[Unit]
+Description=Back up hwaiting SQLite database via restic
+After=network-online.target
+Wants=network-online.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=ajussi
+
+LoadCredentialEncrypted=hwaiting-restic_repo:/etc/credstore/hwaiting/hwaiting-restic_repo.cred
+LoadCredentialEncrypted=hwaiting-restic_pass:/etc/credstore/hwaiting/hwaiting-restic_pass.cred
+
+Environment=RESTIC_REPOSITORY_FILE=%d/hwaiting-restic_repo
+Environment=RESTIC_PASSWORD_FILE=%d/hwaiting-restic_pass
+
+ExecStart=/usr/local/lib/hwaiting/backup.sh
+
+PrivateTmp=yes
+ProtectSystem=strict
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6

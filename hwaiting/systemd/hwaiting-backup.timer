@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily backup of hwaiting database
+Requires=hwaiting-backup.service
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1800
+Persistent=true
+
+[Install]
+WantedBy=timers.target

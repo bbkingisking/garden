@@ -1,0 +1,5 @@
+HOST=0.0.0.0
+PORT=15000
+DATABASE_URL=sqlite:/var/lib/hwaiting/db/hwaiting.sqlite3
+STATIC_DIR=/srv/hwaiting/dist
+ADMIN_USERNAME=seok
