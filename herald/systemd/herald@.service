@@ -1,0 +1,9 @@
+[Unit]
+Description=Herald failure notification for %i
+
+[Service]
+Type=oneshot
+User=herald
+LoadCredentialEncrypted=herald-bot-token:/etc/credstore/herald/herald-bot-token.cred
+LoadCredentialEncrypted=herald-chat-id:/etc/credstore/herald/herald-chat-id.cred
+ExecStart=/bin/sh -c 'journalctl _SYSTEMD_INVOCATION_ID="$MONITOR_INVOCATION_ID" --output=cat --no-pager | /usr/local/bin/herald %i'
