@@ -1,0 +1,16 @@
+# /usr/lib/systemd/system/gitea.service
+[Unit]
+Description=Gitea (Git with a cup of tea)
+After=network.target
+
+[Service]
+RestartSec=30s
+Type=simple
+User=gitea
+Group=gitea
+ExecStart=/usr/local/bin/gitea web -c /etc/gitea/app.ini
+Restart=on-failure
+Environment="GITEA_WORK_DIR=/var/lib/gitea/"
+
+[Install]
+WantedBy=multi-user.target
