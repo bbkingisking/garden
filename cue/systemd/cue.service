@@ -1,0 +1,16 @@
+[Unit]
+Description=Music release notifier
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=cue
+
+Environment=XDG_CONFIG_HOME=/etc/
+Environment=XDG_DATA_HOME=/var/lib/
+
+LoadCredentialEncrypted=cue-notify:/etc/credstore/cue/cue-notify.cred
+LoadCredentialEncrypted=cue-chat-id:/etc/credstore/cue/cue-chat-id.cred
+
+ExecStart=/bin/sh -c '/usr/local/bin/cue | /usr/local/bin/cue_notify.sh'
