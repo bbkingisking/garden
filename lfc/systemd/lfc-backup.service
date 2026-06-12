@@ -15,7 +15,7 @@ Environment=RESTIC_PASSWORD_FILE=%d/lfc-db-backup
 
 Environment=XDG_CACHE_HOME=/var/cache/lfc
 
-ExecStart=/usr/local/sbin/lfc-backup
+ExecStart=/usr/local/sbin/lfc-backup.sh
 
 PrivateTmp=yes
 ProtectSystem=strict

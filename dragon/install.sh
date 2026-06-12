@@ -151,8 +151,6 @@ if [[ -f "/etc/systemd/system/$APP_NAME.service" ]] \
 else
     info "Installing systemd service..."
     sudo cp "$SCRIPT_DIR/systemd/$APP_NAME.service" "/etc/systemd/system/$APP_NAME.service"
-    sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.service" "/etc/systemd/system/$APP_NAME-backup.service"
-    sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.timer" "/etc/systemd/system/$APP_NAME-backup.timer"
     sudo systemctl daemon-reload
     sudo systemctl enable "$APP_NAME"
 fi
@@ -187,3 +185,11 @@ fi
 
 sudo systemctl restart "$APP_NAME"
 info "Done. Use 'sudo systemctl status $APP_NAME' to verify."
+
+# ─── 10. backups ─────────────────────────────────────────────────────────────
+
+BACKUP_BIN="/usr/local/sbin"
+sudo cp "$SCRIPT_DIR/bin/$APP_NAME-backup.sh" "$BACKUP_BIN"
+sudo chmod +x "$BACKUP_BIN/$APP_NAME-backup.sh"
+sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.service" "/etc/systemd/system/"
+sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.timer" "/etc/systemd/system/"

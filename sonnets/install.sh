@@ -193,3 +193,11 @@ sudo chown "$SERVICE_USER" "$DB_PATH"
 sudo chmod 600 "$DB_PATH"
 
 echo "Database restored successfully."
+
+# ─── backups ──────────────────────────────────────────────────────────────────
+
+BACKUP_BIN="/usr/local/sbin"
+sudo cp "$SCRIPT_DIR/bin/$APP_NAME-backup.sh" "$BACKUP_BIN"
+sudo chmod +x "$BACKUP_BIN/$APP_NAME-backup.sh"
+sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.service" "/etc/systemd/system/"
+sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.timer" "/etc/systemd/system/"

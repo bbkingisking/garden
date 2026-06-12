@@ -15,7 +15,7 @@ Environment=RESTIC_PASSWORD_FILE=%d/sonnets-db-backup
 
 Environment=XDG_CACHE_HOME=/var/cache/sonnets
 
-ExecStart=/usr/local/sbin/sonnets-backup
+ExecStart=/usr/local/sbin/sonnets-backup.sh
 
 PrivateTmp=yes
 ProtectSystem=strict

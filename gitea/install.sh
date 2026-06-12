@@ -181,3 +181,11 @@ sudo chown -R "$SERVICE_USER":"$SERVICE_GROUP" /var/lib/gitea
 
 sudo systemctl restart gitea
 info "Restore complete."
+
+# ─── backups ──────────────────────────────────────────────────────────────────
+
+BACKUP_BIN="/usr/local/sbin"
+sudo cp "$SCRIPT_DIR/bin/$APP_NAME-backup.sh" "$BACKUP_BIN"
+sudo chmod +x "$BACKUP_BIN/$APP_NAME-backup.sh"
+sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.service" "/etc/systemd/system/"
+sudo cp "$SCRIPT_DIR/systemd/$APP_NAME-backup.timer" "/etc/systemd/system/"

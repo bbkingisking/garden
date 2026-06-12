@@ -16,7 +16,7 @@ Environment=RESTIC_PASSWORD_FILE=%d/gitea-backup-pass
 Environment=XDG_CACHE_HOME=/var/cache/gitea
 
 ExecStartPre=+/usr/bin/systemctl stop gitea
-ExecStart=/usr/local/sbin/gitea-backup
+ExecStart=/usr/local/sbin/gitea-backup.sh
 ExecStartPost=+/usr/bin/systemctl restart gitea
 
 PrivateTmp=yes
