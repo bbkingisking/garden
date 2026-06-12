@@ -1,0 +1,10 @@
+[Unit]
+Description=Yoggy daily backup timer
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=2h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

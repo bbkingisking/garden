@@ -1,0 +1,18 @@
+[Unit]
+Description=Daily backup of yoggy's database
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=whitman
+
+LoadCredentialEncrypted=yoggy-backup-url:/etc/credstore/yoggy/yoggy-backup-url.cred
+LoadCredentialEncrypted=yoggy-backup-pass:/etc/credstore/yoggy/yoggy-backup-pass.cred
+
+Environment=RESTIC_REPOSITORY_FILE=%d/yoggy-backup-url
+Environment=RESTIC_PASSWORD_FILE=%d/yoggy-backup-pass
+
+ExecStart=/usr/local/sbin/yoggy-backup.sh
+
+PrivateTmp=yes
