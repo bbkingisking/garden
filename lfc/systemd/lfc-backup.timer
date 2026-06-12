@@ -3,6 +3,7 @@ Description=LFC daily database backup timer
 
 [Timer]
 OnCalendar=*-*-* 02:00:00
+RandomizedDelaySec=2h
 Persistent=true
 
 [Install]

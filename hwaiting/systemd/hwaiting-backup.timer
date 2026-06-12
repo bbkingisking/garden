@@ -4,7 +4,7 @@ Requires=hwaiting-backup.service
 
 [Timer]
 OnCalendar=daily
-RandomizedDelaySec=1800
+RandomizedDelaySec=2h
 Persistent=true
 
 [Install]
