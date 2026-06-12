@@ -8,13 +8,13 @@ OnFailure=herald@%n
 Type=oneshot
 User=ajussi
 
-LoadCredentialEncrypted=hwaiting-restic_repo:/etc/credstore/hwaiting/hwaiting-restic_repo.cred
-LoadCredentialEncrypted=hwaiting-restic_pass:/etc/credstore/hwaiting/hwaiting-restic_pass.cred
+LoadCredentialEncrypted=hwaiting-backup-url:/etc/credstore/hwaiting/hwaiting-backup-url.cred
+LoadCredentialEncrypted=hwaiting-backup-pass:/etc/credstore/hwaiting/hwaiting-backup-pass.cred
 
-Environment=RESTIC_REPOSITORY_FILE=%d/hwaiting-restic_repo
-Environment=RESTIC_PASSWORD_FILE=%d/hwaiting-restic_pass
+Environment=RESTIC_REPOSITORY_FILE=%d/hwaiting-backup-url
+Environment=RESTIC_PASSWORD_FILE=%d/hwaiting-backup-pass
 
-ExecStart=/usr/local/lib/hwaiting/backup.sh
+ExecStart=/usr/local/sbin/hwaiting-backup.sh
 
 PrivateTmp=yes
 ProtectSystem=strict
