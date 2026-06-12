@@ -7,7 +7,14 @@ APP_NAME="dragon"
 SERVICE_USER="publius"
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+FRONTEND_SOURCE_CODE="https://github.com/longhousepress/frontend"
+BACKEND_SOURCE_CODE="https://github.com/longhousepress/backend"
+
+SOURCE_CODE_LOCAL_DIR="$HOME/src/$APP_NAME"
+BACKEND_LOCAL_DIR="$SOURCE_CODE_LOCAL_DIR/backend"
+FRONTEND_LOCAL_DIR="$SOURCE_CODE_LOCAL_DIR/frontend"
+
 BINARY_DEST="/usr/local/bin"
 
 CONFIG_DEST="/etc/dragon"
@@ -18,16 +25,6 @@ TEMPLATES_DIR="/srv/dragon/templates"
 CREDS="/etc/credstore/$APP_NAME"
 
 DB_PATH="$DATA_DIR/db.sqlite3"
-
-SECRETS=(
-    token_key
-    stripe_api_key
-    stripe_webhook_secret
-    resend_api_key
-    submissions_to_email
-    database_url
-    restic_password
-)
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -54,6 +51,7 @@ sudo apt install -y \
     pkgconf \
     libpcsclite-dev \
     pcscd \
+    tpm2-tools \
     sqlite3
 
 [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
@@ -75,31 +73,37 @@ else
     sudo useradd -M -s /usr/sbin/nologin "$SERVICE_USER"
 fi
 
-# ─── 3. compile ───────────────────────────────────────────────────────────────
+# ─── 3. compile backend ───────────────────────────────────────────────────────────────
 
-info "Compiling binary..."
-cd "$REPO_DIR"
-cargo build --release
-if [[ "./target/release/backend" -ef "$BINARY_DEST/$APP_NAME" ]]; then
-    info "Binary already in place, skipping."
-else
-    sudo mv "./target/release/backend" "$BINARY_DEST/$APP_NAME"
+if [ ! -d "$SOURCE_CODE_LOCAL_DIR" ]; then
+    sudo mkdir -p "$SOURCE_CODE_LOCAL_DIR"
+    sudo chown "$USER" "$SOURCE_CODE_LOCAL_DIR"
+fi
+
+cd "$SOURCE_CODE_LOCAL_DIR"
+
+if [ ! -d "$BACKEND_LOCAL_DIR" ]; then
+    git clone "$BACKEND_SOURCE_CODE"
+fi
+
+cd "$BACKEND_LOCAL_DIR"
+git pull
+cargo build -q --release
+
+if ! cmp -s "$BACKEND_LOCAL_DIR/target/release/backend" "$BINARY_DEST/$APP_NAME"; then
+    sudo mv "$BACKEND_LOCAL_DIR/target/release/backend" "$BINARY_DEST/$APP_NAME"
     sudo chmod +x "$BINARY_DEST/$APP_NAME"
 fi
-cd "$SCRIPT_DIR"
+
 
 # ─── 4. directories ───────────────────────────────────────────────────────────
 
 info "Setting up directories..."
-for dir in "$CONFIG_DEST" "$DATA_DIR" "$STATIC_DIR" "$PUBLIC_DIR" "$TEMPLATES_DIR"; do
-    sudo mkdir -p "$dir"
-done
+sudo mkdir -p "$CONFIG_DEST" "$DATA_DIR" "$STATIC_DIR" "$PUBLIC_DIR" "$TEMPLATES_DIR"
 
-sudo chown -R "$SERVICE_USER" "$CONFIG_DEST"
-sudo chown -R "$SERVICE_USER" "$DATA_DIR"
-sudo chown -R "$SERVICE_USER" /srv/dragon
+sudo chown -R "$SERVICE_USER" "$CONFIG_DEST" "$DATA_DIR" "/srv/dragon"
 sudo chmod 700 "$CONFIG_DEST"
-sudo chmod -R 770 "$DATA_DIR" "$STATIC_DIR" "$PUBLIC_DIR" "$TEMPLATES_DIR"
+sudo chmod -R 775 "$DATA_DIR" "$STATIC_DIR" "$PUBLIC_DIR" "$TEMPLATES_DIR"
 
 # ─── 5. config file ───────────────────────────────────────────────────────────
 
@@ -111,37 +115,31 @@ sudo chmod 600 "$CONFIG_DEST/config"
 # ─── 6. templates ─────────────────────────────────────────────────────────────
 
 info "Installing templates..."
-sudo cp -r "$REPO_DIR/templates/." "$TEMPLATES_DIR/"
+sudo cp -r "$BACKEND_LOCAL_DIR/templates/." "$TEMPLATES_DIR/"
 sudo chown -R "$SERVICE_USER:root" "$TEMPLATES_DIR"
 sudo find "$TEMPLATES_DIR" -maxdepth 1 -type f -exec chmod 400 {} +
 sudo chmod 500 "$TEMPLATES_DIR"
 
 # ─── 7. credentials ───────────────────────────────────────────────────────────
 
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+IDENTITIES_FILE="$REPO_ROOT/identities"
+
+info "Provisioning secrets..."
 sudo mkdir -p "$CREDS"
-
-all_creds_exist=true
-for name in "${SECRETS[@]}"; do
-    [[ -f "$CREDS/dragon-$name.cred" ]] || { all_creds_exist=false; break; }
+for age_file in "$SCRIPT_DIR/secrets"/*.age; do
+    [ -f "$age_file" ] || continue
+    name="$(basename "${age_file%.age}")"
+    cred_file="$CREDS/${name}.cred"
+    if sudo test -f "$cred_file"; then
+        info "  $name.cred already exists, skipping."
+    else
+        info "  Decrypting $name.age -> $cred_file"
+        age -d -i "$IDENTITIES_FILE" "$age_file" | \
+            sudo systemd-creds encrypt --with-key=tpm2 --name="$name" - "$cred_file"
+        sudo chmod 400 "$cred_file"
+    fi
 done
-
-if $all_creds_exist; then
-    info "All credentials already exist, skipping."
-else
-    info "Encrypting credentials (YubiKey required)..."
-    for name in "${SECRETS[@]}"; do
-        target="$CREDS/dragon-$name.cred"
-        if [[ -f "$target" ]]; then
-            info "  $name already exists, skipping."
-            continue
-        fi
-        info "  Encrypting $name..."
-        age -d -i "$SCRIPT_DIR/secrets/identities" "$SCRIPT_DIR/secrets/$name.age" \
-            | sudo systemd-creds encrypt --tpm2-device=auto --name="dragon-$name" - "$target"
-        sudo chown "$SERVICE_USER" "$target"
-        sudo chmod 400 "$target"
-    done
-fi
 
 # ─── 8. systemd service ───────────────────────────────────────────────────────
 
@@ -185,6 +183,30 @@ fi
 
 sudo systemctl restart "$APP_NAME"
 info "Done. Use 'sudo systemctl status $APP_NAME' to verify."
+
+# --- 7. build frontend
+
+# install pnpm
+cd "$SOURCE_CODE_LOCAL_DIR"
+
+if [ ! -d node-v26.3.0-linux-x64 ]; then
+    curl -O "https://nodejs.org/dist/v26.3.0/node-v26.3.0-linux-x64.tar.xz"
+    tar xf node-v26.3.0-linux-x64.tar.xz
+fi
+
+# use absolute paths to avoid env issues
+export PATH="$SOURCE_CODE_LOCAL_DIR/node-v26.3.0-linux-x64/bin:$PATH"
+
+if [ ! -d "$FRONTEND_LOCAL_DIR" ]; then
+    git clone "$FRONTEND_SOURCE_CODE"
+fi
+
+cd "$FRONTEND_LOCAL_DIR"
+git pull
+
+npm install
+OUT_DIR=./dist npm run build:prod --emptyOutDir
+sudo cp -r dist/* /srv/dragon/public
 
 # ─── 10. backups ─────────────────────────────────────────────────────────────
 
