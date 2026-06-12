@@ -1,9 +1,8 @@
 [Unit]
 Description=Daily backup of hwaiting database
-Requires=hwaiting-backup.service
 
 [Timer]
-OnCalendar=daily
+OnCalendar=*-*-* 03:00:00
 RandomizedDelaySec=2h
 Persistent=true
 
