@@ -1,0 +1,9 @@
+DRAGON_ADDRESS=127.0.0.1
+DRAGON_PORT=2222
+DRAGON_BASE_URL=https://www.longhousepress.org
+DRAGON_RESEND_FROM_EMAIL=info@longhousepress.org
+DRAGON_SUBMISSIONS_FROM_EMAIL=submissions@longhousepress.org
+DRAGON_DB_PATH=/var/lib/dragon/db.sqlite3
+DRAGON_STATIC_DIR=/srv/dragon/static/
+DRAGON_PUBLIC_DIR=/srv/dragon/public
+DRAGON_TEMPLATES_DIR=/srv/dragon/templates

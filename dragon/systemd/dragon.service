@@ -1,0 +1,49 @@
+[Unit]
+Description=Dragon Books backend
+After=network.target
+
+[Service]
+Type=simple
+User=publius
+EnvironmentFile=/etc/dragon/config
+LoadCredentialEncrypted=dragon-token_key:/etc/credstore/dragon/dragon-token_key.cred
+LoadCredentialEncrypted=dragon-stripe_api_key:/etc/credstore/dragon/dragon-stripe_api_key.cred
+LoadCredentialEncrypted=dragon-stripe_webhook_secret:/etc/credstore/dragon/dragon-stripe_webhook_secret.cred
+LoadCredentialEncrypted=dragon-resend_api_key:/etc/credstore/dragon/dragon-resend_api_key.cred
+LoadCredentialEncrypted=dragon-submissions_to_email:/etc/credstore/dragon/dragon-submissions_to_email.cred
+ExecStart=/usr/local/bin/dragon
+
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/srv/dragon/static /srv/dragon/public /srv/dragon/templates
+ReadWritePaths=/var/lib/dragon
+
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RemoveIPC=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+ProcSubset=pid
+UMask=0077
+
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6
+
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @mount @module @reboot @swap @clock @cpu-emulation @debug @raw-io @obsolete
+
+[Install]
+WantedBy=multi-user.target

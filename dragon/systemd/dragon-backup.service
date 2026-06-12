@@ -1,0 +1,18 @@
+[Unit]
+Description=Daily backup of dragon data
+After=network.target
+OnFailure=herald@%n
+
+[Service]
+Type=oneshot
+User=publius
+
+LoadCredentialEncrypted=dragon-backup-url:/etc/credstore/dragon/dragon-backup-url.cred
+LoadCredentialEncrypted=dragon-backup-pass:/etc/credstore/dragon/dragon-backup-pass.cred
+
+Environment=RESTIC_REPOSITORY_FILE=%d/dragon-backup-url
+Environment=RESTIC_PASSWORD_FILE=%d/dragon-backup-pass
+
+ExecStart=/usr/local/sbin/dragon-backup.sh
+
+PrivateTmp=yes
